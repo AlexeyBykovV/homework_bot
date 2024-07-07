@@ -111,9 +111,9 @@ def get_api_answer(timestamp):
     except RequestException as error:
         logger.exception('Ошибка подключения к API:')
         raise ResponseStatusError(
-            f'Во время подключения к эндпоинту {payload['url']} '
+            f'Во время подключения к эндпоинту {payload["url"]} '
             f'произошла ошибка: {error} '
-            f'Параметры: {payload['headers'], payload['params']}'
+            f'Параметры: {payload["headers"], payload["params"]}'
         ) from error
 
     if response.status_code != HTTPStatus.OK:
