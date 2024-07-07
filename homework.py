@@ -61,7 +61,8 @@ def check_tokens():
     if missing_tokens:
         logger.critical(
             'Отсутствует хотя бы одна из обазательных переменных окружения.'
-            'Бот завершил работу.')
+            'Бот завершил работу.'
+        )
         raise EnvironmentError(
             f'Недостающие переменные окружения: {', '.join(missing_tokens)}'
         )
@@ -187,8 +188,7 @@ def main():
     """Основная логика работы бота."""
     check_tokens()
     bot = TeleBot(token=TELEGRAM_TOKEN)
-    # timestamp = int(time.time())
-    timestamp = 1718874840
+    timestamp = int(time.time())
     error_reported = False
 
     while True:
