@@ -178,7 +178,7 @@ def parse_status(homework):
     if homework_status not in HOMEWORK_VERDICTS:
         raise HomeworkStatusError(
             f'Неожиданный статус домашней работы: {homework_status}'
-            )
+        )
 
     verdict = HOMEWORK_VERDICTS[homework_status]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
