@@ -64,7 +64,7 @@ def check_tokens():
             'Бот завершил работу.'
         )
         raise EnvironmentError(
-            f'Недостающие переменные окружения: {', '.join(missing_tokens)}'
+            f'Недостающие переменные окружения: {', '.join(missing_tokens)}.'
         )
     else:
         logger.info('Все необходимые переменные окружения установлены.')
