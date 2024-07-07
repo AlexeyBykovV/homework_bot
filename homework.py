@@ -26,8 +26,8 @@ logger = logging.getLogger(__name__)
 
 BASE_NAME = os.path.splitext(os.path.basename(__file__))[0]
 
-PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+PRACTICUM_TOKEN = None
+TELEGRAM_TOKEN = None
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 RETRY_PERIOD = 600
@@ -64,7 +64,7 @@ def check_tokens():
             'Бот завершил работу.'
         )
         raise EnvironmentError(
-            f'Недостающие переменные окружения: {', '.join(missing_tokens)}.'
+            f'Недостающие переменные окружения: {missing_tokens}.'
         )
     else:
         logger.info('Все необходимые переменные окружения установлены.')
