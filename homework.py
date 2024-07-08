@@ -26,8 +26,8 @@ logger = logging.getLogger(__name__)
 
 BASE_NAME = os.path.splitext(os.path.basename(__file__))[0]
 
-PRACTICUM_TOKEN = None
-TELEGRAM_TOKEN = None
+PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 RETRY_PERIOD = 600
@@ -66,8 +66,8 @@ def check_tokens():
         raise EnvironmentError(
             f'Недостающие переменные окружения: {", ".join(missing_tokens)}.'
         )
-    else:
-        logger.info('Все необходимые переменные окружения установлены.')
+
+    logger.info('Все необходимые переменные окружения установлены.')
 
 
 def send_message(bot, message):
@@ -77,18 +77,19 @@ def send_message(bot, message):
     - экземпляр класса TeleBot
     - строку с текстом сообщения.
     """
-    logger.info(f'Запущена функция отправки сообщения: {message}.')
+    logger.info(f'Запущена отправка сообщения: {message}.')
 
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
-        logger.debug(f'Успешное выполнение отправки сообщения: {message}.')
-        return True
     except ApiException as error:
         logger.exception(f'Произошла ошибка API Telegram: {error}.')
         return False
     except RequestException as error:
         logger.exception(f'Произошла ошибка отправки запроса: {error}.')
         return False
+    else:
+        logger.debug(f'Успешное выполнение отправки сообщения: {message}.')
+        return True
 
 
 def get_api_answer(timestamp):
@@ -109,7 +110,6 @@ def get_api_answer(timestamp):
         logger.info(f'Направлен запрос к API:{payload}')
 
     except RequestException as error:
-        logger.exception('Ошибка подключения к API:')
         raise ResponseStatusError(
             f'Во время подключения к эндпоинту {payload["url"]} '
             f'произошла ошибка: {error} '
@@ -124,7 +124,6 @@ def get_api_answer(timestamp):
             f'Причина: {response.reason} '
             f'Контекст: {response.text}'
         )
-        logger.error(error_message)
         raise ResponseStatusError(error_message) from None
 
     logger.info(f'Успешный запрос к API: {payload}')
@@ -150,7 +149,7 @@ def check_response(response):
     homeworks = response['homeworks']
 
     if not homeworks:
-        logger.debug('Список домашних работ пуст. Статус не изменился.')
+        logger.debug('Список домашних работ пуст / Статус не изменился.')
 
     if not isinstance(homeworks, list):
         raise TypeError(
@@ -189,7 +188,7 @@ def main():
     check_tokens()
     bot = TeleBot(token=TELEGRAM_TOKEN)
     timestamp = int(time.time())
-    error_reported = False
+    last_error_message = None
 
     while True:
         try:
@@ -199,13 +198,12 @@ def main():
                 status = parse_status(homeworks[0])
                 send_message(bot, status)
             timestamp = response.get('current_date', timestamp)
-            error_reported = False
         except Exception as error:
             message = f'Произошел сбой в работе программы: {error}'
-            logger.error(message)
-            if not error_reported:
+            if message != last_error_message:
+                logger.error(message)
                 send_message(bot, message)
-                error_reported = True
+                last_error_message = message
         finally:
             time.sleep(RETRY_PERIOD)
 
